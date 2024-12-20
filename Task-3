@@ -1,94 +1,152 @@
+Created a file named inventory_management.py and inventory.json
+
+in inventory_management.py file:
+
 import tkinter as tk
+from tkinter import messagebox, ttk
+import hashlib
+import json
+import os
 
-# Function to add a new inventory entry
-def add_inventory():
-	item_name = item_name_entry.get()
-	item_qty = int(item_qty_entry.get())
-	with open('inventory.txt', 'a') as file:
-		file.write(f'{item_name},{item_qty}\n')
-	item_name_entry.delete(0, tk.END)
-	item_qty_entry.delete(0, tk.END)
+# Ensure valid JSON structure
+data_file = "inventory.json"
 
-# Function to update an existing inventory entry
-def update_inventory():
-	item_name = item_name_entry.get()
-	item_qty = int(item_qty_entry.get())
-	with open('inventory.txt', 'r') as file:
-		inventory_data = file.readlines()
-	with open('inventory.txt', 'w') as file:
-		for line in inventory_data:
-			name, qty = line.strip().split(',')
-			if name == item_name:
-				file.write(f'{name},{item_qty}\n')
-			else:
-				file.write(line)
-	item_name_entry.delete(0, tk.END)
-	item_qty_entry.delete(0, tk.END)
+def load_data():
+    try:
+        with open(data_file, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        return {"users": {}, "products": {}}
 
-# Function to search and display an inventory entry
-def search_inventory():
-	search_name = item_name_entry.get()
-	with open('inventory.txt', 'r') as file:
-		for line in file:
-			name, qty = line.strip().split(',')
-			if name == search_name:
-				result_label.config(text=f'{name} - {qty}')
-				return
-	result_label.config(text=f'{search_name} not found in inventory.')
-	item_name_entry.delete(0, tk.END)
+def save_data():
+    with open(data_file, "w") as f:
+        json.dump(data, f)
 
-# Function to remove an existing inventory entry
-def remove_inventory():
-	remove_name = item_name_entry.get()
-	with open('inventory.txt', 'r') as file:
-		inventory_data = file.readlines()
-	with open('inventory.txt', 'w') as file:
-		for line in inventory_data:
-			name, qty = line.strip().split(',')
-			if name != remove_name:
-				file.write(line)
-	item_name_entry.delete(0, tk.END)
-	item_qty_entry.delete(0, tk.END)
+# Load data
+data = load_data()
 
-# Function to generate a full list of inventory
-def generate_inventory():
-	with open('inventory.txt', 'r') as file:
-		inventory_data = file.readlines()
-	inventory_text = '\n'.join(inventory_data)
-	result_label.config(text=inventory_text)
+# Hashing passwords
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
-# create the main window
-root = tk.Tk()
-root.title("Inventory Management")
+# User Authentication
+def register_user(username, password):
+    if username in data["users"]:
+        return False, "User already exists!"
+    hashed_pw = hash_password(password)
+    data["users"][username] = hashed_pw
+    save_data()
+    return True, "User registered successfully!"
 
-# input fields
-item_name_label = tk.Label(root, text="Item Name:")
-item_name_label.grid(row=0, column=0, padx=5, pady=5)
-item_name_entry = tk.Entry(root)
-item_name_entry.grid(row=0, column=1, padx=5, pady=5)
-item_qty_label = tk.Label(root, text="Item Quantity:")
-item_qty_label.grid(row=1, column=0, padx=5, pady=5)
-item_qty_entry = tk.Entry(root)
-item_qty_entry.grid(row=1, column=1, padx=5, pady=5)
+def login_user(username, password):
+    if username not in data["users"]:
+        return False, "User does not exist!"
+    stored_pw = data["users"][username]
+    if hash_password(password) == stored_pw:
+        return True, "Login successful!"
+    return False, "Incorrect password!"
 
-# creating the buttons
-add_button = tk.Button(root, text="Add Inventory", 
-					command=add_inventory)
-add_button.grid(row=2, column=0, padx=5, pady=5)
-update_button = tk.Button(root, text="Update Inventory", 
-						command=update_inventory)
-update_button.grid(row=2, column=1, padx=5, pady=5)
-search_button = tk.Button(root, text="Search Inventory", 
-						command=search_inventory)
-search_button.grid(row=3, column=0, padx=5, pady=5)
-remove_button = tk.Button(root, text="Remove Inventory", 
-						command=remove_inventory)
-remove_button.grid(row=3, column=1, padx=5, pady=5)
-generate_button = tk.Button(root, text="Generate Inventory", 
-							command=generate_inventory)
-generate_button.grid(row=4, column=0, padx=5, pady=5)
+# GUI Implementation
+class InventoryApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Inventory Management System")
+        self.logged_in = False
+        self.create_login_screen()
 
-result_label = tk.Label(root, text="List")
-result_label.grid(row=5, column=0, padx=5, pady=5)
+    def create_login_screen(self):
+        self.clear_screen()
+        tk.Label(self.root, text="Username:").pack(pady=5)
+        self.username_entry = tk.Entry(self.root)
+        self.username_entry.pack(pady=5)
+        tk.Label(self.root, text="Password:").pack(pady=5)
+        self.password_entry = tk.Entry(self.root, show="*")
+        self.password_entry.pack(pady=5)
+        tk.Button(self.root, text="Login", command=self.login).pack(pady=5)
+        tk.Button(self.root, text="Register", command=self.register).pack(pady=5)
 
-root.mainloop()
+    def create_main_screen(self):
+        self.clear_screen()
+        tk.Label(self.root, text="Inventory Management", font=("Arial", 16)).pack(pady=10)
+        tk.Button(self.root, text="Add Product", command=self.add_product).pack(pady=5)
+        tk.Button(self.root, text="View Products", command=self.view_products).pack(pady=5)
+        tk.Button(self.root, text="Logout", command=self.logout).pack(pady=5)
+
+    def clear_screen(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+    def login(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        success, message = login_user(username, password)
+        if success:
+            self.logged_in = True
+            self.create_main_screen()
+        else:
+            messagebox.showerror("Login Failed", message)
+
+    def register(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        success, message = register_user(username, password)
+        if success:
+            messagebox.showinfo("Success", message)
+        else:
+            messagebox.showerror("Error", message)
+
+    def add_product(self):
+        def save_product():
+            product_id = product_id_entry.get()
+            name = name_entry.get()
+            quantity = quantity_entry.get()
+            if not (product_id and name and quantity.isdigit()):
+                messagebox.showerror("Error", "Invalid input")
+                return
+            data["products"][product_id] = {"name": name, "quantity": int(quantity)}
+            save_data()
+            messagebox.showinfo("Success", "Product added successfully!")
+            add_window.destroy()
+
+        add_window = tk.Toplevel(self.root)
+        add_window.title("Add Product")
+        tk.Label(add_window, text="Product ID:").pack(pady=5)
+        product_id_entry = tk.Entry(add_window)
+        product_id_entry.pack(pady=5)
+        tk.Label(add_window, text="Name:").pack(pady=5)
+        name_entry = tk.Entry(add_window)
+        name_entry.pack(pady=5)
+        tk.Label(add_window, text="Quantity:").pack(pady=5)
+        quantity_entry = tk.Entry(add_window)
+        quantity_entry.pack(pady=5)
+        tk.Button(add_window, text="Save", command=save_product).pack(pady=10)
+
+    def view_products(self):
+        view_window = tk.Toplevel(self.root)
+        view_window.title("Products")
+        tree = ttk.Treeview(view_window, columns=("ID", "Name", "Quantity"), show="headings")
+        tree.heading("ID", text="Product ID")
+        tree.heading("Name", text="Name")
+        tree.heading("Quantity", text="Quantity")
+        for pid, pdata in data["products"].items():
+            tree.insert("", "end", values=(pid, pdata["name"], pdata["quantity"]))
+        tree.pack(fill=tk.BOTH, expand=True)
+
+    def logout(self):
+        self.logged_in = False
+        self.create_login_screen()
+
+
+# Main Application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = InventoryApp(root)
+    root.mainloop()
+
+in inventory.json file:
+
+{
+    "users": {},
+    "products": {}
+}
+
