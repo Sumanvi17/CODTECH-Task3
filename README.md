@@ -16,6 +16,13 @@ Overview of the project
 
 Project:Python program to manage inventory for a store or warehouse.
 
+![task3-1](https://github.com/user-attachments/assets/1f1bf74d-d2e5-41ff-b994-0af04f7e2ac2)
+![task3-2](https://github.com/user-attachments/assets/8cecb678-c23f-4609-9eaf-76fc4fa252c7)
+![task3-3](https://github.com/user-attachments/assets/3e39036e-3394-441d-a8a6-83602801a099)
+![task3-4](https://github.com/user-attachments/assets/b926d239-fb13-44ac-b5c3-4d2de17fcf9f)
+![task3-5](https://github.com/user-attachments/assets/33dd130e-ec8a-4b06-a9e4-e35b93c537d2)
+
+
 
 
 Objective:
