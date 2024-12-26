@@ -1,4 +1,4 @@
-Created a file with name inventory_management.py
+Created a file name with inventory_management.py
 
 import tkinter as tk
 from tkinter import messagebox, ttk
@@ -200,14 +200,15 @@ class InventoryApp:
         self.logged_in = False
         self.create_login_screen()
 
-
 # Main Application
 if __name__ == "__main__":
     root = tk.Tk()
     app = InventoryApp(root)
     root.mainloop()
 
-created another file with name inventory.json 
+
+
+created another file name with inventory.json 
 
 {
   "users": {
