@@ -1,5 +1,3 @@
-Created a file name with inventory_management.py
-
 import tkinter as tk
 from tkinter import messagebox, ttk
 import hashlib
@@ -207,27 +205,4 @@ if __name__ == "__main__":
     root.mainloop()
 
 
-
-created another file name with inventory.json 
-
-{
-  "users": {
-    "admin": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd187cd3282b3e91b8c"
-  },
-  "products": {
-    "P001": {
-      "name": "Laptop",
-      "quantity": 10
-    },
-    "P002": {
-      "name": "Smartphone",
-      "quantity": 20
-    },
-    "P003": {
-      "name": "Headphones",
-      "quantity": 5
-    }
-  },
-  "sales": []
-}
 
